@@ -139,7 +139,66 @@ This design ensures that:
 - SCORM concerns are isolated and testable
 - the course behaves consistently across SCORM 1.2 and 2004 LMSs
 
-### 5. Suspend data strategy and encoding
+### 5. Route-based bookmarking and learner resume flow
+
+Learner progress is tracked using a **route-based bookmarking strategy**, where each page in the course maps to a logical progression index.
+
+For example:
+
+- `/` → location `0`
+- `/section1` → location `1`
+- `/summary` → location `2`
+
+Rather than coupling progress tracking to individual components or user actions, the system derives progress directly from **navigation**, ensuring that bookmarking remains reliable across:
+
+- page refreshes
+- deep links
+- SPA route transitions
+- LMS iframe reloads
+
+#### Monotonic progress tracking
+
+On every route change, the application:
+
+1. Resolves the current route to a numeric location
+2. Compares it against the previously stored location
+3. Persists the new location **only if it represents forward progress**
+
+This guarantees that:
+
+- progress never regresses when navigating backwards
+- repeated visits to earlier pages do not overwrite progress
+- bookmarking remains deterministic and auditable
+
+All comparison and persistence logic is centralised in the SCORM store, keeping pages and components free of SCORM-specific concerns.
+
+#### Resume vs restart decision
+
+When the course starts, previously persisted progress is hydrated from the best available source (LMS or browser storage).
+
+If the learner has already progressed beyond the start of the course (location > `0`), they are offered a **resume decision** at the course entry point (`/`):
+
+- **Resume** — continue from the furthest previously reached page
+- **Restart** — clear all persisted progress and begin again from the start
+
+This prompt is intentionally:
+
+- shown **only at the course entry route**
+- never shown mid-course
+- never triggered by navigation during an active session
+
+Refreshing or deep-linking to a later route is treated as an implicit intent to continue, avoiding disruptive prompts during learning.
+
+#### Separation of concerns
+
+Progress tracking and resume decision-making are deliberately separated:
+
+- **Progress advancement** runs unconditionally on navigation
+- **Resume prompts** are driven only by persisted state from prior sessions
+
+This avoids race conditions, prevents duplicate writes, and ensures predictable behaviour in both LMS and local development environments.
+
+### 6. Suspend data strategy and encoding
 
 SCORM suspend data is used as the **single source of truth** for learner progress that must survive page reloads, browser restarts, and LMS session boundaries.
 
@@ -168,7 +227,7 @@ All suspend data writes flow through a single store action, ensuring encoding ru
 
 ---
 
-### 6. SCORM version abstraction (1.2 vs 2004)
+### 7. SCORM version abstraction (1.2 vs 2004)
 
 The application supports both **SCORM 1.2** and **SCORM 2004** without branching logic leaking into components.
 
@@ -190,7 +249,7 @@ This keeps learning logic clean and prevents version-specific edge cases from sp
 
 ---
 
-### 7. Debug tooling and local development support
+### 8. Debug tooling and local development support
 
 Working with SCORM often involves **slow feedback loops**, opaque LMS errors, and limited debugging tools.
 
