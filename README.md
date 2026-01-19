@@ -25,7 +25,7 @@ It provides a **modern, opinionated course shell** that respects the constraints
 
 Rather than treating SCORM as an afterthought or a thin wrapper around legacy patterns, NextScorm treats the SCORM runtime as a **first-class global system**, with clear boundaries between learning logic, UI concerns, and persistence.
 
-The goal is not to replace LMS platforms or hide SCORM’s limitations, but to make those constraints explicit and manageable—so developers can build reliable, testable learning experiences without fighting the runtime.
+The goal is not to replace LMS platforms or hide SCORM’s limitations, but to make those constraints explicit and manageable - so developers can build reliable, testable learning experiences without fighting the runtime.
 
 In short:  
 NextScorm is designed to make **SCORM behave predictably in a modern web application**, without sacrificing LMS compatibility or learner experience.
@@ -197,8 +197,8 @@ When the course starts, previously persisted progress is hydrated from the best 
 
 If the learner has already progressed beyond the start of the course (location > `0`), they are offered a **resume decision** at the course entry point (`/`):
 
-- **Resume** — continue from the furthest previously reached page
-- **Restart** — clear all persisted progress and begin again from the start
+- **Resume** - continue from the furthest previously reached page
+- **Restart** - clear all persisted progress and begin again from the start
 
 This prompt is intentionally:
 
