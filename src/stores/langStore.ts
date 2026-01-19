@@ -75,7 +75,7 @@ export const useLangStore = create<LangState>(((set, get) => {
                         throw new Error("NEXT_PUBLIC_LANG_API_BASE not configured");
                     }
 
-                    const res = await fetch(`${API_BASE}/langs.json`);
+                    const res = await fetch(`${API_BASE}/lang/all.json`);
                     if (!res.ok) throw new Error(`API error: ${res.statusText}`);
 
                     const data = (await res.json()) as { language: Language }[];
