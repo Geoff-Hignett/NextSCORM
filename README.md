@@ -6,10 +6,29 @@ A modern **Next.js + TypeScript SCORM course shell** with:
 - Global SCORM lifecycle management (SPA-safe initialise / terminate)
 - Robust suspend data & location persistence with LMS ↔ local fallback
 - Progressive runtime hydration (local preview → LMS authoritative)
+- Route-based bookmarking with learner-controlled resume / restart flow
 - Route- and component-based internationalisation (i18n)
 - Built-in SCORM debug tooling for local development
 
----
+## Why NextScorm exists
+
+Most SCORM content was designed for a pre-SPA web. As a result, many existing SCORM shells struggle with modern application concerns such as client-side routing, predictable state management, and clean separation of concerns.
+
+NextScorm exists to bridge that gap.
+
+It provides a **modern, opinionated course shell** that respects the constraints of SCORM and LMS platforms, while embracing contemporary frontend practices such as:
+
+- explicit state ownership
+- deterministic side effects
+- configuration-driven behaviour
+- SPA-safe lifecycle management
+
+Rather than treating SCORM as an afterthought or a thin wrapper around legacy patterns, NextScorm treats the SCORM runtime as a **first-class global system**, with clear boundaries between learning logic, UI concerns, and persistence.
+
+The goal is not to replace LMS platforms or hide SCORM’s limitations, but to make those constraints explicit and manageable—so developers can build reliable, testable learning experiences without fighting the runtime.
+
+In short:  
+NextScorm is designed to make **SCORM behave predictably in a modern web application**, without sacrificing LMS compatibility or learner experience.
 
 ## 🧠 Architectural Principles
 
