@@ -32,8 +32,7 @@
                 "fields": [
                     { "key": "s1_h1", "Text": "Section 1" },
                     { "key": "s1_p1", "Text": "Ceci est la section 1. Cliquez sur un bouton ci-dessous." },
-                    { "key": "s1_b1", "Text": "Aller au résumé" },
-                    { "key": "s1_b2", "Text": "Retour au début" }
+                    { "key": "s1_b1", "Text": "Aller au résumé" }
                 ]
             },
             {
@@ -43,8 +42,7 @@
                 "fields": [
                     { "key": "s1_h1", "Text": "Bravo !" },
                     { "key": "s1_p1", "Text": "Vous avez terminé le cours." },
-                    { "key": "s1_b1", "Text": "Retour à la section 1" },
-                    { "key": "s1_b2", "Text": "Retour au début" }
+                    { "key": "s1_b1", "Text": "Retour à la section 1" }
                 ]
             }
         ]

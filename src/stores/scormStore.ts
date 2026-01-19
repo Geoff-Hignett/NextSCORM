@@ -21,6 +21,8 @@ export const useScormStore = create<ScormState>((set, get) => ({
     scormInited: { success: false, version: "" },
     suspendData: null,
     location: null,
+    resumeAvailable: false,
+    resumeDecisionMade: false,
 
     // ---------- Actions ----------
     scormConnect: () => {
@@ -193,6 +195,7 @@ export const useScormStore = create<ScormState>((set, get) => ({
     },
 
     scormSetLocation: (location: number) => {
+        console.log("setting location");
         const state = get();
         state.reconnectAttemptIfNeeded();
 
@@ -246,34 +249,26 @@ export const useScormStore = create<ScormState>((set, get) => ({
     hydrateFromPersistence: () => {
         const state = get();
 
+        let loc: number | null = null;
+
         if (state.scormAPIConnected) {
-            const suspend = state.API.get("cmi.suspend_data");
-            const loc = state.version === "1.2" ? state.API.get("cmi.core.lesson_location") : state.API.get("cmi.location");
+            const raw = state.version === "1.2" ? state.API.get("cmi.core.lesson_location") : state.API.get("cmi.location");
 
-            set({
-                suspendData: suspend ?? null,
-                location: loc ? parseInt(loc, 10) : null,
-            });
-
-            debugLog("info", "scorm", "Hydrated from LMS", {
-                suspendLength: suspend?.length ?? 0,
-                location: loc,
-            });
-
-            return;
+            loc = raw ? parseInt(raw, 10) : null;
+        } else {
+            const fallback = localStorage.getItem("bookmark");
+            loc = fallback ? parseInt(fallback, 10) : null;
         }
 
-        const suspend = localStorage.getItem("suspend_data");
-        const loc = localStorage.getItem("bookmark");
-
         set({
-            suspendData: suspend ?? null,
-            location: loc ? parseInt(loc, 10) : null,
+            location: loc,
+            resumeAvailable: typeof loc === "number" && loc > 0,
+            resumeDecisionMade: false,
         });
 
-        debugLog("info", "scorm", "Hydrated from localStorage", {
-            suspendLength: suspend?.length ?? 0,
+        debugLog("info", "scorm", "Hydrated progress", {
             location: loc,
+            resumeAvailable: loc !== null && loc > 0,
         });
     },
 
@@ -286,5 +281,61 @@ export const useScormStore = create<ScormState>((set, get) => ({
         } else {
             state.scormlogNotConnected();
         }
+    },
+
+    updateLocationIfAdvanced: (newLocation: number) => {
+        const state = get();
+
+        const current = state.scormGetLocation();
+
+        if (newLocation > current) {
+            state.scormSetLocation(newLocation);
+
+            debugLog("info", "scorm", "Location advanced", {
+                from: current,
+                to: newLocation,
+            });
+        } else {
+            debugLog("info", "scorm", "Location unchanged", {
+                current,
+                attempted: newLocation,
+            });
+        }
+    },
+
+    resumeCourse: () => {
+        set({ resumeDecisionMade: true });
+
+        debugLog("info", "scorm", "User chose to resume course");
+    },
+
+    restartCourse: () => {
+        const state = get();
+
+        if (state.scormAPIConnected) {
+            if (state.version === "1.2") {
+                state.API.set("cmi.core.lesson_location", "0");
+                state.API.set("cmi.suspend_data", "");
+                state.API.set("cmi.core.lesson_status", "incomplete");
+            } else {
+                state.API.set("cmi.location", "0");
+                state.API.set("cmi.suspend_data", "");
+                state.API.set("cmi.completion_status", "incomplete");
+            }
+
+            state.API.commit();
+        }
+
+        localStorage.removeItem("bookmark");
+        localStorage.removeItem("suspend_data");
+
+        set({
+            location: 0,
+            suspendData: null,
+            resumeAvailable: false,
+            resumeDecisionMade: true,
+        });
+
+        debugLog("info", "scorm", "User restarted course");
     },
 }));

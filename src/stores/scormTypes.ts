@@ -9,6 +9,8 @@ export type ScormState = {
     scormInited: ScormInitResult;
     suspendData: string | null;
     location: number | null;
+    resumeAvailable: boolean;
+    resumeDecisionMade: boolean;
 
     // Actions
     scormConnect: () => void;
@@ -25,4 +27,7 @@ export type ScormState = {
     reconnectAttemptIfNeeded: () => void;
     scormTerminate: () => void;
     hydrateFromPersistence: () => void;
+    updateLocationIfAdvanced: (location: number) => void;
+    resumeCourse: () => void;
+    restartCourse: () => void;
 };

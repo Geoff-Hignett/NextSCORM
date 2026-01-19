@@ -3,6 +3,8 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import LangWrapper from "@/components/lang/LangWrapper";
 import ScormWrapper from "@/components/scorm/ScormWrapper";
+import ScormRouteTracker from "@/components/scorm/ScormRouteTracker";
+import ResumePrompt from "@/components/scorm/ResumePrompt";
 import DebugToggle from "@/components/debug/DebugToggle";
 import DebugPanel from "@/components/debug/DebugPanel";
 
@@ -23,6 +25,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <body className={`${poppins.variable} font-sans antialiased`}>
                 <LangWrapper>
                     <ScormWrapper>
+                        <ResumePrompt />
+                        <ScormRouteTracker />
                         <DebugToggle />
                         <DebugPanel />
                         {children}

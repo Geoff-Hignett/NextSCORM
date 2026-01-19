@@ -14,9 +14,6 @@ export default function Section1() {
             <p className="text-gray-700">{i18nR(pathname, "s1_p1")}</p>
 
             <div className="flex gap-4">
-                <Link href="/" className="rounded bg-gray-200 text-gray-800 px-4 py-2 hover:bg-gray-300">
-                    {i18nR(pathname, "s1_b2")}
-                </Link>
                 <Link href="/summary" className="rounded bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
                     {i18nR(pathname, "s1_b1")}
                 </Link>
