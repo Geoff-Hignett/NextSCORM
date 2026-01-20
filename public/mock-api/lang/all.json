@@ -41,8 +41,8 @@
                     "title": "Summary",
                     "pageID": 2,
                     "fields": [
-                        { "key": "s1_h1", "Text": "Well Done!" },
-                        { "key": "s1_p1", "Text": "You have completed the course." },
+                        { "key": "s1_h1", "Text": "Summary" },
+                        { "key": "s1_p1", "Text": "Well done! You have completed the course!" },
                         { "key": "s1_b1", "Text": "Return to Section 1" }
                     ]
                 }
@@ -91,8 +91,8 @@
                     "title": "Resumen",
                     "pageID": 2,
                     "fields": [
-                        { "key": "s1_h1", "Text": "¡Bien hecho!" },
-                        { "key": "s1_p1", "Text": "Has completado el curso." },
+                        { "key": "s1_h1", "Text": "Resumen" },
+                        { "key": "s1_p1", "Text": "¡Bien hecho! Has completado el curso!" },
                         { "key": "s1_b1", "Text": "Volver a la sección 1" }
                     ]
                 }
@@ -141,8 +141,8 @@
                     "title": "Résumé",
                     "pageID": 2,
                     "fields": [
-                        { "key": "s1_h1", "Text": "Bravo !" },
-                        { "key": "s1_p1", "Text": "Vous avez terminé le cours." },
+                        { "key": "s1_h1", "Text": "Résumé" },
+                        { "key": "s1_p1", "Text": "Bravo ! Vous avez terminé le cours !" },
                         { "key": "s1_b1", "Text": "Retour à la section 1" }
                     ]
                 }

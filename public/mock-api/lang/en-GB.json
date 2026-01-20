@@ -40,8 +40,8 @@
                 "title": "Summary",
                 "pageID": 2,
                 "fields": [
-                    { "key": "s1_h1", "Text": "Well Done!" },
-                    { "key": "s1_p1", "Text": "You have completed the course." },
+                    { "key": "s1_h1", "Text": "Summary" },
+                    { "key": "s1_p1", "Text": "Well done! You have completed the course!" },
                     { "key": "s1_b1", "Text": "Return to Section 1" }
                 ]
             }

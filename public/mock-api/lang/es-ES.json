@@ -40,8 +40,8 @@
                 "title": "Resumen",
                 "pageID": 2,
                 "fields": [
-                    { "key": "s1_h1", "Text": "¡Bien hecho!" },
-                    { "key": "s1_p1", "Text": "Has completado el curso." },
+                    { "key": "s1_h1", "Text": "Resumen" },
+                    { "key": "s1_p1", "Text": "¡Bien hecho! Has completado el curso!" },
                     { "key": "s1_b1", "Text": "Volver a la sección 1" }
                 ]
             }

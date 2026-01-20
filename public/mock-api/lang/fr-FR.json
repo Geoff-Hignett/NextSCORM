@@ -41,7 +41,7 @@
                 "pageID": 2,
                 "fields": [
                     { "key": "s1_h1", "Text": "Bravo !" },
-                    { "key": "s1_p1", "Text": "Vous avez terminé le cours." },
+                    { "key": "s1_p1", "Text": "Bravo ! Vous avez terminé le cours !" },
                     { "key": "s1_b1", "Text": "Retour à la section 1" }
                 ]
             }

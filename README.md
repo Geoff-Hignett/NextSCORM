@@ -7,8 +7,21 @@ A modern **Next.js + TypeScript SCORM course shell** with:
 - Robust suspend data & location persistence with LMS ↔ local fallback
 - Progressive runtime hydration (local preview → LMS authoritative)
 - Route-based bookmarking with learner-controlled resume / restart flow
-- Route- and component-based internationalisation (i18n)
+- Route and component-based internationalisation (i18n)
 - Built-in SCORM debug tooling for local development
+
+---
+
+## Demo
+
+> The examples below show NextScorm running without an LMS, using local persistence.
+> The same behaviour applies when connected to a SCORM 1.2 or 2004 LMS.
+
+### Course lifecycle & resume flow
+
+![Course resume flow](docs/demo/resume-flow.gif)
+
+---
 
 ## Why NextScorm exists
 
