@@ -12,6 +12,22 @@
                     { "code": "fr-FR", "Text": "Français" },
                     { "code": "es-ES", "Text": "Español" }
                 ]
+            },
+            {
+                "key": "resume_title",
+                "Text": "Reprendre votre progression ?"
+            },
+            {
+                "key": "resume_body",
+                "Text": "Nous avons trouvé une progression précédente dans ce cours. Souhaitez-vous reprendre là où vous vous êtes arrêté ou recommencer depuis le début ?"
+            },
+            {
+                "key": "resume_restart",
+                "Text": "Recommencer"
+            },
+            {
+                "key": "resume_continue",
+                "Text": "Reprendre"
             }
         ],
         "routes": [

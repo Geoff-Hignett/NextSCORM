@@ -11,23 +11,30 @@ export type ScormState = {
     location: number | null;
     resumeAvailable: boolean;
     resumeDecisionMade: boolean;
+    attemptedInitialConnect: boolean;
 
     // Actions
     scormConnect: () => void;
     scormlogNotConnected: () => void;
     scormGetLocation: () => number;
-    scormGetSuspendData: () => string | null | false;
-    scormSetSuspendData: (data: object) => void;
+    scormGetSuspendData: () => SuspendPayload | null;
+    scormSetSuspendData: (partial: Partial<SuspendPayload>) => void;
     scormGetScore: () => number | null;
     scormGetStudentName: () => string | null | undefined;
     scormGetStudentID: () => string | null | undefined;
     scormSetComplete: () => void;
     scormSetLocation: (location: number) => void;
     scormSetScore: (score: number) => void;
-    reconnectAttemptIfNeeded: () => void;
     scormTerminate: () => void;
     hydrateFromPersistence: () => void;
     updateLocationIfAdvanced: (location: number) => void;
     resumeCourse: () => void;
     restartCourse: () => void;
+};
+
+export type SuspendPayload = {
+    v: 1;
+    location?: number;
+    lang?: string;
+    [key: string]: unknown;
 };

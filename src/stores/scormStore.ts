@@ -9,8 +9,10 @@
 
 import { create } from "zustand";
 import { scormAPI } from "@/lib/scormApi";
-import type { ScormState } from "./scormTypes";
+import type { ScormState, SuspendPayload } from "./scormTypes";
 import { debugLog } from "@/lib/infra/debugLogger";
+
+import { encodeSuspendData, decodeSuspendData } from "@/lib/scorm/suspendDataCodec";
 
 // ---------- Store ----------
 export const useScormStore = create<ScormState>((set, get) => ({
@@ -23,50 +25,36 @@ export const useScormStore = create<ScormState>((set, get) => ({
     location: null,
     resumeAvailable: false,
     resumeDecisionMade: false,
+    attemptedInitialConnect: false,
 
     // ---------- Actions ----------
     scormConnect: () => {
         const state = get();
-        if (state.scormAPIConnected) {
-            console.log("---SCORM already connected---");
-            debugLog("info", "scorm", "SCORM already connected");
+
+        if (state.attemptedInitialConnect) {
+            debugLog("info", "scorm", "SCORM connect skipped (already attempted)");
             return;
         }
+
+        set({ attemptedInitialConnect: true });
+
         debugLog("info", "scorm", "SCORM connect attempted");
 
         state.API.configure({ version: "1.2", debug: true });
         const result = state.API.initialize();
+
         set({
             scormInited: result,
-            scormConnectRun: state.scormConnectRun + 1,
             scormAPIConnected: result.success,
-            version: result.version,
+            version: result.version ?? "",
         });
 
-        if (result.success) {
-            get().hydrateFromPersistence();
+        if (!result.success) {
+            debugLog("warn", "scorm", "SCORM unavailable — running in standalone mode");
+            return;
         }
 
-        console.warn("SCORM VERSION", result.version);
-        debugLog("info", "scorm", "SCORM initialised", {
-            version: result.version,
-            success: result.success,
-        });
-
-        const currentStatus = result.version === "1.2" ? state.API.get("cmi.core.lesson_status") : state.API.get("cmi.completion_status");
-
-        const normalizedStatus = currentStatus?.toLowerCase() ?? "";
-
-        if (result.success && !["completed", "passed"].includes(normalizedStatus)) {
-            console.log("mark course incomplete");
-            debugLog("info", "scorm", "Marking SCORM incomplete");
-
-            if (result.version === "1.2") {
-                state.API.set("cmi.core.lesson_status", "incomplete");
-            } else {
-                state.API.set("cmi.completion_status", "incomplete");
-            }
-        }
+        get().hydrateFromPersistence();
     },
 
     scormlogNotConnected: () => {
@@ -87,24 +75,42 @@ export const useScormStore = create<ScormState>((set, get) => ({
         return fallback ? parseInt(fallback, 10) : 0;
     },
 
-    scormGetSuspendData: () => {
+    scormGetSuspendData: (): SuspendPayload | null => {
         const state = get();
+
+        let raw: string | null = null;
+
         if (state.scormAPIConnected) {
-            const suspendData = state.API.get("cmi.suspend_data");
-            console.log(suspendData);
-            return suspendData;
+            raw = state.API.get("cmi.suspend_data");
         } else {
-            console.log("scorm not connected");
-            debugLog("warn", "scorm", "Attempted getSuspendData while SCORM disconnected");
-            return false;
+            raw = localStorage.getItem("suspend_data");
+        }
+
+        if (!raw) return null;
+
+        try {
+            return decodeSuspendData(raw) as SuspendPayload;
+        } catch {
+            debugLog("error", "scorm", "Failed to decode suspend data");
+            return null;
         }
     },
 
-    scormSetSuspendData: (data: object) => {
+    scormSetSuspendData: (partial: Partial<SuspendPayload>) => {
         const state = get();
-        state.reconnectAttemptIfNeeded();
 
-        const encoded = JSON.stringify(data).replace(/[']/g, "¬").replace(/["]+/g, "~").replace(/[,]/g, "|");
+        console.log("[SCORM] scormSetSuspendData", partial, "connected:", state.scormAPIConnected);
+
+        const existing = state.scormGetSuspendData();
+        const { v: _ignored, ...existingWithoutV } = existing ?? {};
+
+        const next: SuspendPayload = {
+            v: 1,
+            ...existingWithoutV,
+            ...partial,
+        };
+
+        const encoded = encodeSuspendData(next);
 
         if (state.scormAPIConnected) {
             if (state.version === "1.2" && encoded.length > 4096) {
@@ -118,11 +124,6 @@ export const useScormStore = create<ScormState>((set, get) => ({
         }
 
         set({ suspendData: encoded });
-
-        debugLog("info", "scorm", "Suspend data persisted", {
-            length: encoded.length,
-            target: state.scormAPIConnected ? "lms" : "local",
-        });
     },
 
     scormGetScore: () => {
@@ -178,7 +179,7 @@ export const useScormStore = create<ScormState>((set, get) => ({
 
     scormSetComplete: () => {
         const state = get();
-        state.reconnectAttemptIfNeeded();
+
         if (state.scormAPIConnected) {
             if (state.version === "1.2") {
                 state.API.set("cmi.core.lesson_status", "completed");
@@ -195,10 +196,9 @@ export const useScormStore = create<ScormState>((set, get) => ({
     },
 
     scormSetLocation: (location: number) => {
-        console.log("setting location");
         const state = get();
-        state.reconnectAttemptIfNeeded();
 
+        // Persist bookmark (cheap + frequent)
         if (state.scormAPIConnected) {
             if (state.version === "1.2") {
                 state.API.set("cmi.core.lesson_location", location.toString());
@@ -210,17 +210,15 @@ export const useScormStore = create<ScormState>((set, get) => ({
             localStorage.setItem("bookmark", location.toString());
         }
 
-        set({ location });
+        // ✅ ALSO merge into suspend data (authoritative)
+        state.scormSetSuspendData({ location });
 
-        debugLog("info", "scorm", "Location persisted", {
-            location,
-            target: state.scormAPIConnected ? "lms" : "local",
-        });
+        set({ location });
     },
 
     scormSetScore: (score: number) => {
         const state = get();
-        state.reconnectAttemptIfNeeded();
+
         console.log("setting score:", score);
         debugLog("info", "scorm", "Setting SCORM score", { score });
         if (state.scormAPIConnected) {
@@ -237,50 +235,56 @@ export const useScormStore = create<ScormState>((set, get) => ({
         }
     },
 
-    reconnectAttemptIfNeeded: () => {
-        const state = get();
-        if (!state.scormConnectRun && !state.scormAPIConnected) {
-            console.log("SCORM not connected, reconnecting...");
-            debugLog("warn", "scorm", "Reconnect attempt triggered");
-            state.scormConnect();
-        }
-    },
-
     hydrateFromPersistence: () => {
         const state = get();
+        console.log("[SCORM] hydrateFromPersistence", state.scormGetSuspendData());
+
+        const suspend = state.scormGetSuspendData();
 
         let loc: number | null = null;
 
-        if (state.scormAPIConnected) {
-            const raw = state.version === "1.2" ? state.API.get("cmi.core.lesson_location") : state.API.get("cmi.location");
+        // 1. Prefer suspend data
+        if (typeof suspend?.location === "number") {
+            loc = suspend.location;
+        }
 
-            loc = raw ? parseInt(raw, 10) : null;
-        } else {
-            const fallback = localStorage.getItem("bookmark");
-            loc = fallback ? parseInt(fallback, 10) : null;
+        // 2. Fallback to localStorage bookmark
+        else {
+            const bookmark = localStorage.getItem("bookmark");
+            if (bookmark !== null) {
+                const parsed = Number(bookmark);
+                if (!Number.isNaN(parsed)) {
+                    loc = parsed;
+                }
+            }
         }
 
         set({
             location: loc,
             resumeAvailable: typeof loc === "number" && loc > 0,
             resumeDecisionMade: false,
+            suspendData: suspend ? encodeSuspendData(suspend) : null,
         });
+
+        if (suspend?.lang) {
+            import("@/stores/langStore").then(({ useLangStore }) => {
+                useLangStore.getState().loadLang(suspend.lang, { persist: false });
+            });
+        }
 
         debugLog("info", "scorm", "Hydrated progress", {
             location: loc,
-            resumeAvailable: loc !== null && loc > 0,
+            lang: suspend?.lang,
         });
     },
 
     scormTerminate: () => {
         const state = get();
-        state.reconnectAttemptIfNeeded();
-        if (state.scormAPIConnected) {
-            state.API.terminate();
-            debugLog("info", "scorm", "SCORM session terminated");
-        } else {
-            state.scormlogNotConnected();
-        }
+
+        if (!state.scormAPIConnected) return;
+
+        state.API.terminate();
+        debugLog("info", "scorm", "SCORM session terminated");
     },
 
     updateLocationIfAdvanced: (newLocation: number) => {

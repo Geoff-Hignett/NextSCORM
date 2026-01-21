@@ -16,7 +16,11 @@ export default function LangSelector() {
     return (
         <div className="lang-selector">
             <label className="mr-2">{i18nUI("lang_selector_label")}:</label>
-            <select value={activeLang?.isocode ?? ""} onChange={(e) => loadLang(e.target.value)} className="border rounded px-2 py-1">
+
+            <select
+                value={activeLang?.isocode ?? ""}
+                onChange={(e) => loadLang(e.target.value, { persist: true })}
+                className="border rounded px-2 py-1">
                 {langOptions.map((opt) => (
                     <option key={opt.code} value={opt.code}>
                         {opt.Text}

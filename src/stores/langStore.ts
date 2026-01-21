@@ -4,6 +4,7 @@
  * Global state for internationalisation.
  * - Supports local JSON, per-language API, and all-languages API
  * - Provides helpers (i18nR, i18nUI) for route, component, and UI translations
+ * - Explicitly separates hydration from persistence
  */
 
 import { create, StateCreator } from "zustand";
@@ -12,6 +13,7 @@ import FR from "@/language/fr-FR.json";
 import ES from "@/language/es-ES.json";
 import type { LangState, Mode } from "./langTypes";
 import type { Language } from "@/types/language";
+import { useScormStore } from "@/stores/scormStore";
 
 const API_BASE = process.env.NEXT_PUBLIC_LANG_API_BASE;
 
@@ -25,7 +27,6 @@ const localLangs: Record<string, Language> = {
 // ---------- Store ----------
 export const useLangStore = create<LangState>(((set, get) => {
     const defaultLang = "en-GB";
-
     const mode: Mode = (process.env.NEXT_PUBLIC_LANG_MODE as Mode) ?? "local";
 
     return {
@@ -39,9 +40,21 @@ export const useLangStore = create<LangState>(((set, get) => {
 
         setMode: (mode) => set({ mode }),
 
-        loadLang: async (code) => {
-            const { mode, defaultLang } = get();
+        /**
+         * Load a language.
+         * - persist: true  → user-initiated change (write to SCORM/local)
+         * - persist: false → hydration (read-only, no side-effects)
+         */
+        loadLang: async (code?: string, options?: { persist?: boolean }) => {
+            const { activeLang, defaultLang } = get();
             const langCode = code ?? defaultLang;
+
+            // Prevent redundant reloads
+            if (activeLang?.isocode === langCode) {
+                return;
+            }
+
+            const shouldPersist = options?.persist === true;
 
             set({ isLoading: true, error: undefined });
 
@@ -49,12 +62,15 @@ export const useLangStore = create<LangState>(((set, get) => {
                 if (mode === "local") {
                     const lang = localLangs[langCode];
                     if (!lang) throw new Error(`No local language: ${langCode}`);
+
                     set({
                         activeLang: lang,
                         languages: { ...get().languages, [langCode]: lang },
                         isLoading: false,
                     });
-                } else if (mode === "apiSingle") {
+                }
+
+                if (mode === "apiSingle") {
                     if (!API_BASE) {
                         throw new Error("NEXT_PUBLIC_LANG_API_BASE not configured");
                     }
@@ -70,7 +86,9 @@ export const useLangStore = create<LangState>(((set, get) => {
                         languages: { ...get().languages, [langCode]: lang },
                         isLoading: false,
                     });
-                } else if (mode === "apiAll") {
+                }
+
+                if (mode === "apiAll") {
                     if (!API_BASE) {
                         throw new Error("NEXT_PUBLIC_LANG_API_BASE not configured");
                     }
@@ -81,7 +99,6 @@ export const useLangStore = create<LangState>(((set, get) => {
                     const data = (await res.json()) as { language: Language }[];
 
                     const langMap: Record<string, Language> = {};
-
                     data.forEach(({ language }) => {
                         langMap[language.isocode] = language;
                     });
@@ -92,9 +109,15 @@ export const useLangStore = create<LangState>(((set, get) => {
                         isLoading: false,
                     });
                 }
+
+                // ✅ Persist ONLY for user-driven changes
+                if (shouldPersist) {
+                    useScormStore.getState().scormSetSuspendData({
+                        lang: langCode,
+                    });
+                }
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : "Unknown error";
-
                 set({ error: message, isLoading: false });
             }
         },
@@ -111,6 +134,7 @@ export const useLangStore = create<LangState>(((set, get) => {
         i18nR: (path, key) => {
             const page = get().findPageByPath(path);
             if (!page) return key;
+
             const field = page.fields.find((f) => f.key === key);
             return field ? field.Text : "TEXT NOT FOUND";
         },
@@ -120,10 +144,7 @@ export const useLangStore = create<LangState>(((set, get) => {
             const field = activeLang?.ui?.find((f) => f.key === key);
 
             if (!field) return "TEXT NOT FOUND";
-
-            if ("Text" in field) {
-                return field.Text;
-            }
+            if ("Text" in field) return field.Text;
 
             return "TEXT NOT FOUND";
         },

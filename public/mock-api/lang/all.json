@@ -13,6 +13,22 @@
                         { "code": "fr-FR", "Text": "Français" },
                         { "code": "es-ES", "Text": "Español" }
                     ]
+                },
+                {
+                    "key": "resume_title",
+                    "Text": "Resume your progress?"
+                },
+                {
+                    "key": "resume_body",
+                    "Text": "We found previous progress in this course. Would you like to continue where you left off, or restart from the beginning?"
+                },
+                {
+                    "key": "resume_restart",
+                    "Text": "Restart"
+                },
+                {
+                    "key": "resume_continue",
+                    "Text": "Resume"
                 }
             ],
             "routes": [
@@ -63,6 +79,22 @@
                         { "code": "fr-FR", "Text": "Français" },
                         { "code": "es-ES", "Text": "Español" }
                     ]
+                },
+                {
+                    "key": "resume_title",
+                    "Text": "¿Reanudar tu progreso?"
+                },
+                {
+                    "key": "resume_body",
+                    "Text": "Hemos encontrado un progreso anterior en este curso. ¿Deseas continuar donde lo dejaste o reiniciar desde el principio?"
+                },
+                {
+                    "key": "resume_restart",
+                    "Text": "Reiniciar"
+                },
+                {
+                    "key": "resume_continue",
+                    "Text": "Reanudar"
                 }
             ],
             "routes": [
@@ -113,6 +145,22 @@
                         { "code": "fr-FR", "Text": "Français" },
                         { "code": "es-ES", "Text": "Español" }
                     ]
+                },
+                {
+                    "key": "resume_title",
+                    "Text": "Reprendre votre progression ?"
+                },
+                {
+                    "key": "resume_body",
+                    "Text": "Nous avons trouvé une progression précédente dans ce cours. Souhaitez-vous reprendre là où vous vous êtes arrêté ou recommencer depuis le début ?"
+                },
+                {
+                    "key": "resume_restart",
+                    "Text": "Recommencer"
+                },
+                {
+                    "key": "resume_continue",
+                    "Text": "Reprendre"
                 }
             ],
             "routes": [

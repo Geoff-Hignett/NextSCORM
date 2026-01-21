@@ -12,6 +12,22 @@
                     { "code": "fr-FR", "Text": "Français" },
                     { "code": "es-ES", "Text": "Español" }
                 ]
+            },
+            {
+                "key": "resume_title",
+                "Text": "¿Reanudar tu progreso?"
+            },
+            {
+                "key": "resume_body",
+                "Text": "Hemos encontrado un progreso anterior en este curso. ¿Deseas continuar donde lo dejaste o reiniciar desde el principio?"
+            },
+            {
+                "key": "resume_restart",
+                "Text": "Reiniciar"
+            },
+            {
+                "key": "resume_continue",
+                "Text": "Reanudar"
             }
         ],
         "routes": [

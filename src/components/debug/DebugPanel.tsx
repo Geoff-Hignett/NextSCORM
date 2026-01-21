@@ -4,6 +4,7 @@ import React from "react";
 import { useDebugStore } from "@/stores/debugStore";
 import { useScormStore } from "@/stores/scormStore";
 import { isDebugEnabled } from "@/lib/infra/env";
+import { decodeSuspendData } from "@/lib/scorm/suspendDataCodec";
 
 function Row({ label, value, source }: { label: string; value: React.ReactNode; source?: "LMS" | "Local" }) {
     return (
@@ -30,20 +31,26 @@ function SuspendDataView({ data }: { data: string | null | undefined }) {
         return <div className="text-xs text-gray-400 mt-1">—</div>;
     }
 
-    let parsed: unknown = null;
+    let decoded: unknown;
     let parseError = false;
 
     try {
-        parsed = JSON.parse(data);
+        decoded = decodeSuspendData(data);
     } catch {
         parseError = true;
     }
 
     return (
-        <div className="mt-2 space-y-1">
-            <pre className="max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs text-gray-800">
-                {parseError ? data : JSON.stringify(parsed, null, 2)}
-            </pre>
+        <div className="mt-2 space-y-2">
+            <div>
+                <div className="text-xs text-gray-500 mb-1">Decoded</div>
+                <pre className="rounded bg-gray-100 p-2 text-xs">{parseError ? "Decode failed" : JSON.stringify(decoded, null, 2)}</pre>
+            </div>
+
+            <div>
+                <div className="text-xs text-gray-500 mb-1">Raw</div>
+                <pre className="rounded bg-gray-50 p-2 text-xs font-mono text-gray-600">{data}</pre>
+            </div>
         </div>
     );
 }
