@@ -15,7 +15,7 @@ export default function LangWrapper({ children }: { children: React.ReactNode })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (isLoading || !activeLang) {
+    if (!activeLang) {
         return <div className="p-6 text-center">Loading language…</div>;
     }
 

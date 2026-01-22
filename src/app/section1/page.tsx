@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLangStore } from "@/stores/langStore";
+import { courseLink } from "@/lib/courseLink";
 
 export default function Section1() {
     const pathname = usePathname();
@@ -14,7 +15,7 @@ export default function Section1() {
             <p className="text-gray-700">{i18nR(pathname, "s1_p1")}</p>
 
             <div className="flex gap-4">
-                <Link href="/summary" className="rounded bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                <Link href={courseLink("summary")} className="rounded bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
                     {i18nR(pathname, "s1_b1")}
                 </Link>
             </div>

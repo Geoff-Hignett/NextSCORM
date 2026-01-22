@@ -12,7 +12,7 @@ export type LangState = {
     error?: string;
 
     setMode: (mode: Mode) => void;
-    loadLang: (code?: string) => Promise<void>;
+    loadLang: (code?: string, options?: { persist?: boolean }) => Promise<void>;
     findPageByPath: (path: string) => Route | undefined;
     i18nR: (path: string, key: string) => string;
     i18nUI: (key: string) => string;

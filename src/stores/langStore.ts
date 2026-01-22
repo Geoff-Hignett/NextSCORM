@@ -49,8 +49,13 @@ export const useLangStore = create<LangState>(((set, get) => {
             const { activeLang, defaultLang } = get();
             const langCode = code ?? defaultLang;
 
-            // Prevent redundant reloads
-            if (activeLang?.isocode === langCode) {
+            // DO NOT clear language if already active
+            if (activeLang && activeLang.isocode === langCode) {
+                return;
+            }
+
+            if (!langCode) {
+                console.warn("[lang] loadLang called without code");
                 return;
             }
 
@@ -141,12 +146,16 @@ export const useLangStore = create<LangState>(((set, get) => {
 
         i18nUI: (key) => {
             const { activeLang } = get();
-            const field = activeLang?.ui?.find((f) => f.key === key);
+            if (!activeLang) return "";
 
-            if (!field) return "TEXT NOT FOUND";
-            if ("Text" in field) return field.Text;
+            const field = activeLang.ui?.find((f) => f.key === key);
+            if (!field) return "";
 
-            return "TEXT NOT FOUND";
+            if ("Text" in field) {
+                return field.Text;
+            }
+
+            return "";
         },
     };
 }) as StateCreator<LangState>);

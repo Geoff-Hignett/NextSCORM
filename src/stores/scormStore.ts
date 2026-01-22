@@ -237,19 +237,26 @@ export const useScormStore = create<ScormState>((set, get) => ({
 
     hydrateFromPersistence: () => {
         const state = get();
-        console.log("[SCORM] hydrateFromPersistence", state.scormGetSuspendData());
 
         const suspend = state.scormGetSuspendData();
 
         let loc: number | null = null;
 
-        // 1. Prefer suspend data
-        if (typeof suspend?.location === "number") {
+        // 1. SCORM lesson_location ALWAYS wins when connected
+        if (state.scormAPIConnected) {
+            const lmsLoc = state.scormGetLocation();
+            if (typeof lmsLoc === "number" && lmsLoc > 0) {
+                loc = lmsLoc;
+            }
+        }
+
+        // 2. Then suspend data
+        if (loc === null && typeof suspend?.location === "number") {
             loc = suspend.location;
         }
 
-        // 2. Fallback to localStorage bookmark
-        else {
+        // 3. Finally localStorage
+        if (loc === null) {
             const bookmark = localStorage.getItem("bookmark");
             if (bookmark !== null) {
                 const parsed = Number(bookmark);
@@ -271,11 +278,6 @@ export const useScormStore = create<ScormState>((set, get) => ({
                 useLangStore.getState().loadLang(suspend.lang, { persist: false });
             });
         }
-
-        debugLog("info", "scorm", "Hydrated progress", {
-            location: loc,
-            lang: suspend?.lang,
-        });
     },
 
     scormTerminate: () => {
