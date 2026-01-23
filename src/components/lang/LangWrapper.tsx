@@ -5,7 +5,7 @@ import { useLangStore } from "@/stores/langStore";
 import LangSelector from "@/components/lang/LangSelector";
 
 export default function LangWrapper({ children }: { children: React.ReactNode }) {
-    const { loadLang, activeLang, isLoading, mode } = useLangStore();
+    const { loadLang, activeLang, mode } = useLangStore();
 
     useEffect(() => {
         if (mode !== "local") {
