@@ -221,6 +221,12 @@ This prompt is intentionally:
 
 Refreshing or deep-linking to a later route is treated as an implicit intent to continue, avoiding disruptive prompts during learning.
 
+#### Resume vs restart decision
+
+When returning learners have existing progress, the course presents a clear resume decision at the entry point.
+
+![Resume or restart modal](docs/demo/resume-restart.png)
+
 #### Separation of concerns
 
 Progress tracking and resume decision-making are deliberately separated:
@@ -299,3 +305,9 @@ When no SCORM API is available (for example during local development), the syste
 - easier debugging of state transitions
 
 This dual-mode behaviour ensures that developers can build and test confidently, while the production build remains fully LMS-compliant.
+
+### Debug panel (local development)
+
+The built-in debug panel exposes SCORM state and persistence behaviour during local development, allowing developers to inspect and manipulate progress without an LMS.
+
+![SCORM debug panel](docs/demo/debug-panel.png)
